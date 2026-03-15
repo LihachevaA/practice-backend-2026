@@ -52,3 +52,21 @@ class BookingOut(BookingBase):
     end_time: datetime
     class Config:
         from_attributes = True
+
+class ReviewCreate(BaseModel):
+    resource_id: int
+    text: str
+    rating: int = Field(..., ge=1, le=5)
+
+class ReviewOut(BaseModel):
+    id: int
+    text: str
+    rating: int
+    user_id: int
+    class Config:
+        from_attributes = True
+
+class ResourceWithRating(Resource):
+    average_rating: float = 0.0
+    class Config:
+        from_attributes = True
