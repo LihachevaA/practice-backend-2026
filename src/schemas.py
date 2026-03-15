@@ -1,4 +1,5 @@
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr, Field, validator
+from datetime import datetime
 from typing import Optional, List
 
 class UserCreate(BaseModel):
@@ -16,12 +17,9 @@ class Token(BaseModel):
     access_token: str
     token_type: str
 
-class TokenData(BaseModel):
-    email: Optional[str] = None
-
 class ResourceBase(BaseModel):
-    name: str
-    capacity: int
+    name: str = Field(..., min_length=2)
+    capacity: int = Field(..., gt=0)
     has_whiteboard: bool = False
 
 class ResourceCreate(ResourceBase):
@@ -29,5 +27,28 @@ class ResourceCreate(ResourceBase):
 
 class Resource(ResourceBase):
     id: int
+    class Config:
+        from_attributes = True
+
+class BookingBase(BaseModel):
+    resource_id: int
+    start_time: datetime
+    end_time: datetime
+
+    @validator('end_time')
+    def end_date_must_be_after_start(cls, v, values):
+        if 'start_time' in values and v <= values['start_time']:
+            raise ValueError('Время окончания должно быть позже времени начала')
+        return v
+
+class BookingCreate(BookingBase):
+    pass
+
+class BookingOut(BookingBase):
+    id: int
+    user_id: int
+    resource_id: int
+    start_time: datetime
+    end_time: datetime
     class Config:
         from_attributes = True

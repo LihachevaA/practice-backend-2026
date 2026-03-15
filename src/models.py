@@ -1,4 +1,5 @@
 from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, Boolean
+from sqlalchemy.orm import relationship
 from .database import Base
 
 class User(Base):
@@ -7,6 +8,8 @@ class User(Base):
     email = Column(String, unique=True, index=True)
     hashed_password = Column(String)
     role = Column(String, default="user")
+    
+    bookings = relationship("Booking", back_populates="owner")
 
 class Resource(Base):
     __tablename__ = "resources"
@@ -14,6 +17,8 @@ class Resource(Base):
     name = Column(String)
     capacity = Column(Integer)
     has_whiteboard = Column(Boolean, default=False)
+    
+    bookings = relationship("Booking", back_populates="resource")
 
 class Booking(Base):
     __tablename__ = "bookings"
@@ -22,3 +27,6 @@ class Booking(Base):
     resource_id = Column(Integer, ForeignKey("resources.id"))
     start_time = Column(DateTime)
     end_time = Column(DateTime)
+    
+    owner = relationship("User", back_populates="bookings")
+    resource = relationship("Resource", back_populates="bookings")
